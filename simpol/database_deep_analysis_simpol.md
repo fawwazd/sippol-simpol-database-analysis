@@ -1,7 +1,7 @@
 # SIMPOL Database Deep Analysis
 
 > **Analisis Mendalam Database Project SIMPOL**  
-> Generated: 2025-08-26  
+> 2025-08-26  
 > Database: MySQL/MariaDB (db_ci)  
 > Framework: CodeIgniter 4  
 

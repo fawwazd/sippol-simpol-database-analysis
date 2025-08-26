@@ -1,436 +1,383 @@
-# DATABASE SIMPPOL - DESIGN SEDERHANA
-## Sistem Magang Kominfo Kediri
+# DATABASE SIMPPOL - DESIGN LENGKAP
+## Sistem Informasi Magang dan Praktek Kerja Lapangan
 
-*Database yang menggabungkan SIPPOL + SIMPOL + fitur magang baru*
-
----
-
-## **SIAPA SAJA USERNYA?**
-
-### **👤 4 JENIS USER**
-1. **ADMIN SISTEM** - Kelola seluruh sistem
-2. **KEPALA BIDANG** - Approve pengajuan dan assign pembimbing
-3. **PEMBIMBING** - Bimbing peserta sehari-hari
-4. **PESERTA MAGANG** - Mahasiswa yang magang
+*Berdasarkan analisis database SIPPOL dan SIMPOL yang sudah ada*
 
 ---
 
-### **🏗️ ENTITY RELATIONSHIP DIAGRAM SIMPPOL**
+## **SIAPA SAJA USER SISTEMNYA?**
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                             DATABASE SIMPPOL - ERD LENGKAP                                     │
-│                    Sistem Informasi Magang dan Praktek Kerja Lapangan                         │
-└─────────────────────────────────────────────────────────────────────────────────────────────────┘
+### **👥 4 LEVEL USER**
+1. **ADMIN SISTEM** (Level 1) - Kelola seluruh sistem
+2. **KEPALA BIDANG** (Level 2) - Approve pengajuan magang
+3. **PEMBIMBING** (Level 3) - Bimbing peserta sehari-hari  
+4. **PESERTA MAGANG** (Level 4) - Mahasiswa yang magang
 
-                                   ┌─────────────────────┐
-                                   │   system_configs    │ 
-                                   ├─────────────────────┤
-                                   │ 🔑 config_key (PK)  │
-                                   │    config_value     │
-                                   │    description      │
-                                   │    is_public        │
-                                   │    created_at       │
-                                   │    updated_at       │
-                                   └─────────────────────┘
+---
 
-┌─────────────────────┐      ┌─────────────────────┐      ┌─────────────────────┐
-│    institutions     │      │      bidang         │      │  kepala_bidang      │
-├─────────────────────┤      ├─────────────────────┤      ├─────────────────────┤
-│ 🔑 id (PK)          │      │ 🔑 id (PK)          │      │ 🔑 id (PK)          │
-│    name             │      │    nama_bidang      │      │ 🔗 bidang_id (FK)   │
-│    alamat           │      │    deskripsi        │      │    nama_kepala      │
-│    phone            │      │    is_active        │      │    nip              │
-│    contact_person   │      │    created_at       │      │    email            │
-│    email            │      │    updated_at       │      │    phone            │
-│    website          │      └─────────────────────┘      │    is_active        │
-│    is_active        │               │                    │    created_at       │
-│    created_at       │               │1:M                 │    updated_at       │
-│    updated_at       │               ▼                    └─────────────────────┘
-│    deleted_at       │      ┌─────────────────────┐               │
-└─────────────────────┘      │    pembimbing       │               │1:M
-         │                   ├─────────────────────┤               │
-         │1:M                │ 🔑 id (PK)          │               ▼
-         │                   │ 🔗 bidang_id (FK)   │      ┌─────────────────────┐
-         ▼                   │ 🔗 kepala_id (FK)   │      │       users         │
-┌─────────────────────┐      │    nama_pembimbing  │      ├─────────────────────┤
-│   applications      │      │    nip              │      │ 🔑 id (PK)          │
-├─────────────────────┤      │    email            │      │    username (UQ)    │
-│ 🔑 id (PK)          │      │    phone            │      │    email (UQ)       │
-│ 🔗 institution_id(FK)│     │    spesialisasi     │      │    password_hash    │
-│    group_name       │      │    max_peserta      │      │    full_name        │
-│    applicant_name   │      │    is_active        │      │    npm              │
-│    applicant_email  │      │    created_at       │      │    phone            │
-│    phone            │      │    updated_at       │      │    photo_url        │
-│    start_date       │      └─────────────────────┘      │    level_user       │
-│    end_date         │               │                    │    is_active        │
-│    bidang_pilihan   │ *NEW*         │1:M                 │    is_online        │
-│    durasi_bulan     │ *NEW*         │                    │ 🔗 institution_id(FK)│
-│    participants     │               ▼                    │ 🔗 supervisor_id(FK)│
-│    description      │      ┌─────────────────────┐      │ 🔗 bidang_id (FK)   │ *NEW*
-│    status           │      │       users         │      │ 🔗 pembimbing_id(FK)│ *NEW*
-│    priority         │      │   (extends here)    │      │    internship_start │
-│    reviewed_by      │      └─────────────────────┘      │    internship_end   │
-│    approved_by_kb   │ *NEW*         │1:M                 │    first_login      │
-│    reviewed_at      │               │                    │    last_login       │
-│    review_notes     │               ▼                    │    created_at       │
-│    docs_path        │      ┌─────────────────────┐      │    updated_at       │
-│    year             │      │     attendance      │      │    deleted_at       │
-│    created_at       │      ├─────────────────────┤      └─────────────────────┘
-│    updated_at       │      │ 🔑 id (PK)          │               │
-│    deleted_at       │      │ 🔗 user_id (FK)     │               │1:M
-└─────────────────────┘      │    date             │               │
-                            │    status           │               ▼
-                            │    check_in_time    │      ┌─────────────────────┐
-                            │    check_out_time   │      │      journals       │
-                            │    total_hours      │      ├─────────────────────┤
-                            │    description      │      │ 🔑 id (PK)          │
-                            │    location_lat     │      │ 🔗 user_id (FK)     │
-                            │    location_lng     │      │    date             │
-                            │    ip_address       │      │    group_name       │
-                            │    backup_name      │      │    activity_desc    │
-                            │    backup_npm       │      │    skills_learned   │ *NEW*
-                            │    backup_institution│     │    challenges       │ *NEW*
-                            │    is_approved      │      │    solutions        │ *NEW*
-                            │    approved_by      │      │    start_time       │
-                            │    created_at       │      │    end_time         │
-                            │    updated_at       │      │    status           │
-                            └─────────────────────┘      │    supervisor_notes │
-                                     │                   │    reviewed_by      │
-                                     │M:1                │    reviewed_at      │
-                                     │                   │    created_at       │
-                                     ▼                   │    updated_at       │
-                            ┌─────────────────────┐      └─────────────────────┘
-                            │       grades        │
-                            ├─────────────────────┤      ┌─────────────────────┐
-                            │ 🔑 id (PK)          │      │       tasks         │
-                            │ 🔗 user_id (FK)     │      ├─────────────────────┤
-                            │ 🔗 graded_by (FK)   │      │ 🔑 id (PK)          │
-                            │    category         │      │    title            │
-                            │    grade_value      │      │    description      │
-                            │    max_grade        │      │    instructions     │
-                            │    justification    │      │    schedule_week    │
-                            │    semester         │      │    due_date         │
-                            │    graded_at        │      │    max_score        │
-                            │    is_final         │      │    submission_type  │
-                            │    created_at       │      │    is_group_task    │
-                            │    updated_at       │      │    created_by       │
-                            └─────────────────────┘      │    is_active        │
-                                     │                   │    created_at       │
-                                     │M:M               │    updated_at       │
-                                     │                   │    deleted_at       │
-                                     ▼                   └─────────────────────┘
-                            ┌─────────────────────┐               │
-                            │ task_submissions    │               │1:M
-                            ├─────────────────────┤               │
-                            │ 🔑 id (PK)          │               ▼
-                            │ 🔗 user_id (FK)     │      ┌─────────────────────┐
-                            │ 🔗 task_id (FK)     │      │    certificates     │
-                            │    submission_text  │      ├─────────────────────┤
-                            │    submission_files │      │ 🔑 id (PK)          │
-                            │    status           │      │    title            │
-                            │    score            │      │    type             │
-                            │    feedback         │      │    issued_to_user   │
-                            │    graded_by        │      │    certificate_url  │
-                            │    submitted_at     │      │    qr_code          │
-                            │    graded_at        │      │    verification_code│
-                            │    created_at       │      │    issued_date      │
-                            │    updated_at       │      │    issued_by        │
-                            └─────────────────────┘      │    is_revoked       │
-                                     │                   │    created_at       │
-                                     │M:1                │    updated_at       │
-                                     ▼                   └─────────────────────┘
-                            ┌─────────────────────┐      
-                            │       files         │      ┌─────────────────────┐
-                            ├─────────────────────┤      │  notifications      │
-                            │ 🔑 id (PK)          │      ├─────────────────────┤
-                            │    original_name    │      │ 🔑 id (PK)          │
-                            │    stored_name      │      │ 🔗 user_id (FK)     │
-                            │    file_path        │      │    type             │
-                            │    file_size        │      │    title            │
-                            │    mime_type        │      │    message          │
-                            │    file_hash        │      │    is_read          │
-                            │    category         │      │    priority         │
-                            │ 🔗 uploaded_by (FK) │      │    created_at       │
-                            │    entity_type      │      └─────────────────────┘
-                            │    entity_id        │      
-                            │    is_public        │      ┌─────────────────────┐
-                            │    uploaded_at      │      │ user_activity_log   │
-                            │    deleted_at       │      ├─────────────────────┤
-                            └─────────────────────┘      │ 🔑 id (PK)          │
-                                                        │ 🔗 user_id (FK)     │
-                                                        │    action           │
-                                                        │    entity_type      │
-                                                        │    entity_id        │
-                                                        │    ip_address       │
-                                                        │    user_agent       │
-                                                        │    details (JSON)   │
-                                                        │    timestamp        │
-                                                        └─────────────────────┘
-
-KETERANGAN:
-🔑 = Primary Key
-🔗 = Foreign Key  
-UQ = Unique Constraint
-1:M = One to Many (Satu ke Banyak)
-M:1 = Many to One (Banyak ke Satu)
-M:M = Many to Many (Banyak ke Banyak)
-*NEW* = Field/Tabel Baru untuk fitur magang
-
-RELASI UTAMA:
-1. institutions (1) → applications (M)      [institution_id]
-2. bidang (1) → pembimbing (M)              [bidang_id]
-3. kepala_bidang (1) → users (M)            [kepala_bidang sebagai supervisor]
-4. pembimbing (1) → users (M)               [pembimbing_id]
-5. users (1) → attendance (M)               [user_id]
-6. users (1) → journals (M)                 [user_id]
-7. users (1) → task_submissions (M)         [user_id]
-8. tasks (1) → task_submissions (M)         [task_id]
-9. users (1) → grades (M)                   [user_id]
-10. users (1) → notifications (M)           [user_id]
-```
-
-## **GIMANA ALUR KERJANYA?**
+## **ALUR KERJA SISTEM**
 
 ### **🔄 ALUR PESERTA MAGANG**
 ```
-1. DAFTAR MAGANG ONLINE
-   - Isi form pengajuan
-   - Pilih bidang (Aptika/Komunikasi/dll)
-   - Upload dokumen
+1. PENGAJUAN MAGANG
+   - Daftar online melalui form pengajuan
+   - Upload dokumen surat pengantar
+   - Pilih bidang yang diinginkan
+   - Tentukan durasi magang
    
-2. TUNGGU PERSETUJUAN  
-   - Admin review → Setuju/Tolak
-   - Kepala Bidang review → Pilih pembimbing
-   - Dapat akun login
+2. PROSES PERSETUJUAN  
+   - Admin review dokumen
+   - Kepala bidang approve dan assign pembimbing
+   - Sistem buat akun login peserta
    
-3. MULAI MAGANG
-   - Absen masuk/keluar 
-   - Isi jurnal harian
+3. AKTIVITAS MAGANG HARIAN
+   - Check-in dan check-out presensi
+   - Isi jurnal aktivitas harian
    - Kerjakan tugas dari pembimbing
+   - Upload hasil tugas
    
-4. SELESAI MAGANG
-   - Dapat nilai dari pembimbing
+4. EVALUASI DAN SELESAI
+   - Pembimbing kasih nilai
    - Dapat sertifikat digital
 ```
 
-### **🔄 ALUR PEMBIMBING**
+### **🔄 ALUR PEMBIMBING** 
 ```
 1. DAPAT PESERTA BARU
-   - Notifikasi ada peserta baru
-   - Lihat profil peserta
+   - Terima notifikasi peserta baru
+   - Review profil peserta
    
-2. BIMBING HARIAN
-   - Cek absensi peserta
-   - Kasih tugas
-   - Review jurnal harian
-   - Kasih nilai
+2. SUPERVISI HARIAN
+   - Monitor kehadiran peserta
+   - Kasih tugas mingguan
+   - Review dan approve jurnal
+   - Kasih feedback dan nilai
 ```
 
 ---
 
-## **TABEL APA SAJA DI DATABASE?**
+## **ERD (ENTITY RELATIONSHIP DIAGRAM)**
 
-### **📊 MASTER DATA (Data Dasar)**
+### **🏗️ DIAGRAM RELASI TABEL SIMPPOL**
 
-#### **1. Tabel: bidang**
 ```
-Menyimpan bidang-bidang di Kominfo
-- id
-- nama_bidang (Aptika, Komunikasi, dll)
-- kuota_max (berapa peserta maksimal)
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                         DATABASE SIMPPOL - ERD LENGKAP                                │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+
+                    ┌─────────────────────┐            ┌─────────────────────┐
+                    │      configs        │            │       bidang        │ *NEW*
+                    ├─────────────────────┤            ├─────────────────────┤
+                    │ title               │            │ id_bidang (PK)      │
+                    └─────────────────────┘            │ nama_bidang         │
+                                                      │ deskripsi           │
+                                                      │ kuota_maksimal      │
+                                                      │ is_active           │
+                                                      └─────────────────────┘
+                                                               │
+                                                               │1:M
+                                                               ▼
+┌─────────────────────┐         ┌─────────────────────┐      ┌─────────────────────┐
+│      instansi       │         │    kepala_bidang    │ *NEW*│    pembimbing       │ *NEW*
+├─────────────────────┤         ├─────────────────────┤      ├─────────────────────┤
+│ id_instansi (PK)    │         │ id_kepala (PK)      │      │ id_pembimbing (PK)  │
+│ nama_instansi       │         │ bidang_id (FK)      │      │ bidang_id (FK)      │
+│ alamat_instansi     │         │ nama_kepala         │      │ kepala_id (FK)      │
+└─────────────────────┘         │ nip                 │      │ nama_pembimbing     │
+         │                      │ email               │      │ nip                 │
+         │1:M                   │ phone               │      │ email               │
+         │                      │ is_active           │      │ phone               │
+         ▼                      └─────────────────────┘      │ spesialisasi        │
+┌─────────────────────┐                  │                   │ max_peserta         │
+│     pengajuan       │                  │1:M                │ is_active           │
+├─────────────────────┤                  │                   └─────────────────────┘
+│ id_pengajuan (PK)   │                  ▼                            │
+│ id_instansi (FK)    │         ┌─────────────────────┐               │1:M
+│ nama_kelompok       │ *NEW*   │       users         │               │
+│ nama_pemohon        │ *NEW*   ├─────────────────────┤               ▼
+│ email_pemohon       │ *NEW*   │ id_user (PK)        │      ┌─────────────────────┐
+│ bidang_pilihan      │ *NEW*   │ username            │      │       users         │
+│ durasi_bulan        │ *NEW*   │ password            │      │   (extended)        │
+│ date_mulai          │ *NEW*   │ nama_lengkap        │      ├─────────────────────┤
+│ date_selesai        │ *NEW*   │ npm                 │      │ email               │
+│ srt_pengajuan       │         │ phone               │      │ level_user          │
+│ srt_balasan         │         │ photo_url           │      │ is_active           │
+│ tahun               │         │ level_user:         │      │ id_instansi (FK)    │
+│ keterangan          │         │   1 = Admin         │      │ bidang_id (FK)      │ *NEW*
+│ timestamp           │         │   2 = Kepala Bidang │      │ pembimbing_id (FK)  │ *NEW*
+│ status              │ *NEW*   │   3 = Pembimbing    │      │ mulai_magang        │
+│ reviewed_by         │ *NEW*   │   4 = Peserta       │      │ akhir_magang        │
+│ approved_by_kb      │ *NEW*   │ is_active           │      │ is_online           │
+└─────────────────────┘         │ is_online           │      │ date_create         │
+         │                      │ date_create         │      │ first_login         │
+         │M:1                   │ first_login         │      │ last_login          │
+         │                      └─────────────────────┘      └─────────────────────┘
+         ▼                               │                            │
+┌─────────────────────┐                 │1:M                         │1:M
+│       files         │                 ▼                            ▼
+├─────────────────────┤        ┌─────────────────────┐      ┌─────────────────────┐
+│ id_file (PK)        │        │      presensi       │      │     jurnal          │
+│ original_name       │        ├─────────────────────┤      ├─────────────────────┤
+│ stored_name         │        │ id_data (PK)        │      │ id_jurnal (PK)      │
+│ file_path           │        │ id_user (FK)        │      │ id_user (FK)        │
+│ file_size           │        │ data_nama           │      │ datetime_jurnal     │
+│ mime_type           │        │ data_npm            │      │ kelompok_jurnal     │
+│ category            │        │ data_tanggal        │      │ deskripsi_jurnal    │
+│ uploaded_by (FK)    │        │ data_status         │      │ mulai_jurnal        │
+│ entity_type         │        │ data_deskripsi      │      │ selesai_jurnal      │
+│ entity_id           │        │ data_asal           │      │ status_jurnal       │
+│ uploaded_at         │        └─────────────────────┘      │ catatan_pembimbing  │ *NEW*
+└─────────────────────┘                                     │ reviewed_by (FK)    │ *NEW*
+                                                            │ reviewed_at         │ *NEW*
+                              ┌─────────────────────┐       └─────────────────────┘
+                              │       tugas         │
+                              ├─────────────────────┤       ┌─────────────────────┐
+                              │ id_tugas (PK)       │       │      nilai          │
+                              │ judul_tugas         │ *NEW* ├─────────────────────┤
+                              │ deskripsi_tugas     │       │ id_nilai (PK)       │
+                              │ jadwal_tugas        │       │ id_user (FK)        │
+                              │ deadline            │ *NEW* │ id_pembimbing (FK)  │ *NEW*
+                              │ max_score           │ *NEW* │ kategori_nilai      │
+                              │ created_by (FK)     │ *NEW* │ nilai               │
+                              │ is_active           │ *NEW* │ justifikasi         │
+                              └─────────────────────┘       │ semester            │ *NEW*
+                                       │                    │ is_final            │ *NEW*
+                                       │1:M                 │ created_at          │
+                                       ▼                    └─────────────────────┘
+                              ┌─────────────────────┐
+                              │  submission_tugas   │       ┌─────────────────────┐
+                              ├─────────────────────┤       │    sertifikat       │
+                              │ id_submission (PK)  │       ├─────────────────────┤
+                              │ id_user (FK)        │       │ id_sertifikat (PK)  │
+                              │ id_tugas (FK)       │       │ id_user (FK)        │
+                              │ submission_text     │ *NEW* │ judul_sertifikat    │ *NEW*
+                              │ submission_files    │       │ link_sertifikat     │
+                              │ dateline_tugas      │       │ qr_code             │ *NEW*
+                              │ status              │ *NEW* │ verification_code   │ *NEW*
+                              │ score               │ *NEW* │ issued_date         │ *NEW*
+                              │ feedback            │ *NEW* │ issued_by (FK)      │ *NEW*
+                              │ graded_by (FK)      │ *NEW* │ is_revoked          │ *NEW*
+                              │ graded_at           │ *NEW* └─────────────────────┘
+                              └─────────────────────┘
+
+KETERANGAN:
+- PK = Primary Key
+- FK = Foreign Key  
+- *NEW* = Field/fitur baru atau enhancement
+- 1:M = One to Many (Satu ke Banyak)
 ```
 
-#### **2. Tabel: kepala_bidang** 
+---
+
+## **DETAIL TABEL DATABASE**
+
+### **📊 TABEL DARI SIPPOL (DIPERTAHANKAN)**
+
+#### **1. configs**
 ```
-Data kepala setiap bidang
-- id
-- bidang_id (bidang mana)
-- nama_kepala
-- email
-- nip
+Konfigurasi sistem
+- title (TEXT) - Setting sistem
 ```
 
-#### **3. Tabel: pembimbing**
-```
-Data pembimbing di setiap bidang
-- id  
-- bidang_id (bidang mana)
-- nama_pembimbing
-- email
-- spesialisasi (keahlian)
-- max_peserta (maksimal bimbing berapa orang)
+#### **2. instansi**
+```  
+Master institusi/universitas
+- id_instansi (PK)
+- nama_instansi
+- alamat_instansi
 ```
 
-#### **4. Tabel: institusi**
-```
-Data universitas/sekolah peserta
-- id
-- nama_institusi
-- alamat
-- contact_person
-```
-
-### **📊 DATA PENGGUNA**
-
-#### **5. Tabel: users**
+#### **3. users** (Gabungan dari `user` SIPPOL + `db_user` SIMPOL)
 ```
 Data semua pengguna sistem
-- id
-- username
-- email  
-- password
+- id_user (PK)
+- username (UNIQUE)
+- password (HASHED)
 - nama_lengkap
 - npm (untuk peserta)
+- email (UNIQUE)
+- phone
+- photo_url
 - level_user:
-  * 1 = Admin
-  * 2 = Kepala Bidang
-  * 3 = Pembimbing  
+  * 1 = Admin Sistem
+  * 2 = Kepala Bidang  
+  * 3 = Pembimbing
   * 4 = Peserta Magang
-- bidang_id (ditempatkan di bidang mana)
-- pembimbing_id (dibimbing siapa)
-- institusi_id (dari institusi mana)
+- is_active (1=aktif, 0=non-aktif)
+- is_online (1=online, 0=offline)
+- id_instansi (FK ke instansi)
+- bidang_id (FK ke bidang) *NEW*
+- pembimbing_id (FK ke pembimbing) *NEW*
+- mulai_magang
+- akhir_magang
+- date_create
+- first_login
+- last_login
 ```
 
-### **📊 DATA PENGAJUAN MAGANG**
-
-#### **6. Tabel: pengajuan**
+#### **4. presensi** 
 ```
-Data pengajuan magang
-- id
-- institusi_id (dari institusi mana)
-- nama_kelompok
-- nama_pemohon
-- email_pemohon
-- bidang_pilihan (mau ke bidang mana)
-- durasi_bulan (berapa bulan magang)
-- tanggal_mulai
-- tanggal_selesai
-- status:
-  * draft = Belum submit
-  * submitted = Sudah submit
-  * approved_admin = Disetujui admin
-  * approved_kabid = Disetujui kepala bidang
-  * rejected = Ditolak
-- dokumen_path (file surat pengantar dll)
+Data kehadiran peserta (dari SIPPOL)
+- id_data (PK)
+- id_user (FK)
+- data_nama (backup nama)
+- data_npm (backup npm)
+- data_tanggal
+- data_status ('5'=check in, lainnya=check out)
+- data_deskripsi
+- data_asal (backup institusi)
 ```
 
-### **📊 DATA AKTIVITAS MAGANG**
-
-#### **7. Tabel: absensi**
+#### **5. pengajuan** (Enhanced dari SIPPOL)
 ```
-Data kehadiran peserta
-- id
-- user_id (peserta mana)
-- tanggal
-- jam_masuk
-- jam_keluar  
-- total_jam
-- lokasi_lat (GPS latitude)
-- lokasi_lng (GPS longitude)
-- foto_absen
-- keterangan_aktivitas
-- status_approved (sudah disetujui pembimbing?)
-```
-
-#### **8. Tabel: jurnal_harian**
-```  
-Jurnal aktivitas harian peserta
-- id
-- user_id (peserta mana)
-- tanggal
-- aktivitas_hari_ini (min 50 kata)
-- skill_yang_dipelajari (NEW!)
-- kendala_yang_dihadapi (NEW!)
-- solusi_yang_diterapkan (NEW!)
-- jam_mulai
-- jam_selesai
-- status:
-  * 0 = Draft
-  * 1 = Sudah submit
-  * 2 = Disetujui pembimbing
-  * 3 = Ditolak
-- catatan_pembimbing
+Pengajuan magang
+- id_pengajuan (PK)
+- id_instansi (FK)
+- nama_kelompok *NEW*
+- nama_pemohon *NEW*
+- email_pemohon *NEW*
+- bidang_pilihan *NEW*
+- durasi_bulan *NEW*
+- date_mulai *NEW*
+- date_selesai *NEW*
+- srt_pengajuan
+- srt_balasan
+- tahun
+- keterangan
+- timestamp
+- status (draft/submitted/approved/rejected) *NEW*
+- reviewed_by (FK ke users) *NEW*
+- approved_by_kb (FK ke kepala bidang) *NEW*
 ```
 
-#### **9. Tabel: tugas**
+### **📊 TABEL DARI SIMPOL (DIPERTAHANKAN)**
+
+#### **6. jurnal** (dari `db_jurnal` SIMPOL)
+```
+Jurnal aktivitas harian
+- id_jurnal (PK)
+- id_user (FK)
+- datetime_jurnal
+- kelompok_jurnal
+- deskripsi_jurnal
+- mulai_jurnal
+- selesai_jurnal
+- status_jurnal (0=draft, 1=submitted, 2=approved, 3=rejected)
+- catatan_pembimbing *NEW*
+- reviewed_by (FK) *NEW*
+- reviewed_at *NEW*
+```
+
+#### **7. tugas** (dari `db_tugas` SIMPOL)
 ```
 Tugas dari pembimbing
-- id
-- judul_tugas
+- id_tugas (PK)
+- judul_tugas *NEW*
 - deskripsi_tugas
-- deadline
-- nilai_max
-- pembuat_tugas (pembimbing mana)
-- minggu_ke (minggu 1,2,3,4)
+- jadwal_tugas (minggu 1,2,3,4)
+- deadline *NEW*
+- max_score *NEW*
+- created_by (FK ke users) *NEW*
+- is_active *NEW*
 ```
 
-#### **10. Tabel: pengumpulan_tugas**
+#### **8. submission_tugas** (dari `db_galery_tugas` SIMPOL)
 ```
-Hasil tugas dari peserta
-- id
-- user_id (peserta mana)
-- tugas_id (tugas mana)
-- jawaban_teks
-- file_tugas (file yang diupload)
-- nilai_dapat
-- feedback_pembimbing
-- tanggal_kumpul
-```
-
-### **📊 DATA PENILAIAN**
-
-#### **11. Tabel: penilaian**
-```
-Nilai peserta dari pembimbing
-- id
-- user_id (peserta mana)
-- kategori_nilai:
-  * Kedisiplinan
-  * Komunikasi
-  * Inisiatif
-  * Kerjasama
-  * Technical Skills
-- nilai (0-100)
-- justifikasi (alasan nilai)
-- pembimbing_id (yang kasih nilai)
+Pengumpulan tugas peserta
+- id_submission (PK)
+- id_user (FK)
+- id_tugas (FK)
+- submission_text *NEW*
+- submission_files (gambar_tugas)
+- dateline_tugas
+- status (submitted/graded/revision) *NEW*
+- score *NEW*
+- feedback *NEW*
+- graded_by (FK) *NEW*
+- graded_at *NEW*
 ```
 
-#### **12. Tabel: sertifikat**
+#### **9. nilai** (dari `db_nilai` SIMPOL)
 ```
-Sertifikat digital peserta
-- id
-- user_id (untuk peserta mana)
-- judul_sertifikat
-- file_sertifikat (PDF)
-- qr_code (untuk verifikasi)
-- kode_verifikasi
-- tanggal_terbit
-```
-
-### **📊 DATA PENDUKUNG**
-
-#### **13. Tabel: notifikasi**
-```
-Notifikasi untuk user
-- id
-- user_id (untuk user mana)
-- judul
-- pesan
-- sudah_dibaca
-- tanggal_buat
+Penilaian peserta
+- id_nilai (PK)
+- id_user (FK)
+- id_pembimbing (FK) *NEW*
+- kategori_nilai (justifikasi_mhs → kategori_mhs)
+- nilai (nilai_mhs)
+- justifikasi
+- semester *NEW*
+- is_final *NEW*
+- created_at *NEW*
 ```
 
-#### **14. Tabel: file**
+#### **10. sertifikat** (dari `db_sertifikat` SIMPOL)
 ```
-Semua file yang diupload
-- id
-- nama_asli
-- nama_disimpan
-- ukuran_file
-- jenis_file
-- kategori (dokumen_pengajuan, tugas, foto, dll)
-- yang_upload
+Sertifikat digital
+- id_sertifikat (PK)
+- id_user (FK)
+- judul_sertifikat *NEW*
+- link_sertifikat
+- qr_code *NEW*
+- verification_code *NEW*
+- issued_date *NEW*
+- issued_by (FK) *NEW*
+- is_revoked *NEW*
+```
+
+### **📊 TABEL BARU (FITUR MAGANG)**
+
+#### **11. bidang** *(TABEL BARU)*
+```
+Master bidang Kominfo
+- id_bidang (PK)
+- nama_bidang (Aptika, Komunikasi, dll)
+- deskripsi
+- kuota_maksimal
+- is_active
+```
+
+#### **12. kepala_bidang** *(TABEL BARU)*
+```
+Data kepala bidang
+- id_kepala (PK)
+- bidang_id (FK)
+- nama_kepala
+- nip
+- email
+- phone
+- is_active
+```
+
+#### **13. pembimbing** *(TABEL BARU)*
+```
+Data pembimbing
+- id_pembimbing (PK)
+- bidang_id (FK)
+- kepala_id (FK)
+- nama_pembimbing
+- nip
+- email
+- phone
+- spesialisasi
+- max_peserta
+- is_active
+```
+
+#### **14. files** (Unified dari berbagai tabel galery SIMPOL)
+```
+Unified file management
+- id_file (PK)
+- original_name
+- stored_name
+- file_path
+- file_size
+- mime_type
+- category (dokumen_pengajuan/tugas/profil)
+- uploaded_by (FK)
+- entity_type (pengajuan/submission_tugas/users)
+- entity_id
+- uploaded_at
 ```
 
 ---
@@ -439,171 +386,211 @@ Semua file yang diupload
 
 ### **🔗 RELASI UTAMA**
 ```
-bidang → kepala_bidang (1 bidang punya 1 kepala)
-bidang → pembimbing (1 bidang punya banyak pembimbing) 
-pembimbing → users (1 pembimbing bimbing banyak peserta)
-institusi → pengajuan (1 institusi bisa kirim banyak pengajuan)
-users → absensi (1 peserta punya banyak absensi)
-users → jurnal_harian (1 peserta punya banyak jurnal)
-users → pengumpulan_tugas (1 peserta kumpul banyak tugas)
-tugas → pengumpulan_tugas (1 tugas dikumpul banyak peserta)
+instansi → pengajuan (1:M)
+instansi → users (1:M)
+
+bidang → kepala_bidang (1:1)
+bidang → pembimbing (1:M)
+bidang → users (1:M)
+
+pembimbing → users (1:M)
+users → presensi (1:M)
+users → jurnal (1:M)
+users → submission_tugas (1:M)
+users → nilai (1:M)
+users → sertifikat (1:M)
+
+tugas → submission_tugas (1:M)
 ```
 
 ---
 
-## **CARA PINDAHIN DATA DARI SISTEM LAMA**
+## **MIGRASI DATA DARI SISTEM LAMA**
 
-### **📤 DARI SIPPOL KE SIMPPOL**
+### **📤 DARI SIPPOL**
 
-#### **Data Institusi**
+#### **Data Instansi**
 ```
-instansi (SIPPOL) → institusi (SIMPPOL)
-- nama_instansi → nama_institusi
-- alamat_instansi → alamat
+instansi (SIPPOL) → instansi (SIMPPOL)
+- Langsung copy semua data
 ```
 
-#### **Data User**
+#### **Data User** 
 ```
-user (SIPPOL) → users (SIMPPOL)  
+user (SIPPOL) → users (SIMPPOL)
 - username → username
+- password → password (sudah hashed)
 - nama → nama_lengkap
 - npm → npm
-- password → password
 - level_user = 4 (semua jadi peserta)
+- id_instansi → id_instansi
+- mulai_magang → mulai_magang
+- akhir_magang → akhir_magang
+- status → is_active
 ```
 
-#### **Data Absensi**
+#### **Data Presensi**
 ```
-presensi (SIPPOL) → absensi (SIMPPOL)
-- data_tanggal → tanggal
-- data_status → jam_masuk/jam_keluar
-- data_deskripsi → keterangan_aktivitas
+presensi (SIPPOL) → presensi (SIMPPOL)
+- Langsung copy semua data
+- Tidak ada perubahan struktur
 ```
 
-### **📤 DARI SIMPOL KE SIMPPOL**
+#### **Data Pengajuan**
+```
+pengajuan (SIPPOL) → pengajuan (SIMPPOL)
+- Tambah field baru yang kosong
+- Set status = 'approved' untuk data lama
+```
+
+### **📤 DARI SIMPOL**
+
+#### **Data User SIMPOL**
+```
+db_user (SIMPOL) → users (SIMPPOL)
+- username → username
+- password → password
+- nama_user → nama_lengkap
+- email_user → email
+- level_user → level_user (1=admin, 2=user → perlu mapping)
+- is_active → is_active
+- date_create → date_create
+```
 
 #### **Data Jurnal**
 ```
-db_jurnal (SIMPOL) → jurnal_harian (SIMPPOL)
-- deskripsi_jurnal → aktivitas_hari_ini
-- mulai_jurnal → jam_mulai
-- selesai_jurnal → jam_selesai
-- status_jurnal → status
+db_jurnal (SIMPOL) → jurnal (SIMPPOL)
+- Langsung copy dengan tambahan field kosong
 ```
 
-#### **Data Tugas**
+#### **Data Tugas & Submission**
 ```
 db_tugas (SIMPOL) → tugas (SIMPPOL)
-- deskripsi_tugas → deskripsi_tugas
-- jadwal_tugas → minggu_ke
-
-db_galery_tugas (SIMPOL) → pengumpulan_tugas (SIMPPOL)
-- gambar_tugas → file_tugas
+db_galery_tugas (SIMPOL) → submission_tugas (SIMPPOL)
+- Tambah field enhancement
 ```
 
 #### **Data Nilai**
 ```
-db_nilai (SIMPOL) → penilaian (SIMPPOL)
+db_nilai (SIMPOL) → nilai (SIMPPOL)
 - kategori_mhs → kategori_nilai
 - nilai_mhs → nilai
 - justifikasi_mhs → justifikasi
 ```
 
-### **📝 DATA BARU YANG HARUS DIISI**
+### **📝 DATA BARU HARUS DIISI**
 
 #### **Master Bidang**
 ```
-INSERT bidang:
-1. Aplikasi Informatika (Aptika)
-2. Komunikasi dan Informasi Publik  
+INSERT INTO bidang:
+1. Aplikasi Informatika
+2. Komunikasi dan Informasi Publik
 3. Statistik dan Persandian
+4. E-Government
 ```
 
-#### **Master Kepala Bidang**
+#### **Master Kepala Bidang & Pembimbing**
 ```
-INSERT kepala_bidang:
-- Kepala Bidang Aptika
-- Kepala Bidang Komunikasi
-- Kepala Bidang Statistik
-- dll (sesuai struktur Kominfo)
-```
-
-#### **Master Pembimbing**
-```
-INSERT pembimbing:
-- Pembimbing A (Aptika)
-- Pembimbing B (Aptika)
-- Pembimbing C (Komunikasi)
-- Pembimbing D (Statistik)
-- dll
+Sesuai struktur organisasi Kominfo Kediri saat ini
 ```
 
 ---
 
-## **FITUR BARU YANG DITAMBAH**
+## **FITUR ENHANCEMENT**
 
-### **✨ YANG DULU GAK ADA, SEKARANG ADA**
+### **✨ FITUR YANG DITINGKATKAN**
 
-1. **Master Bidang** - Sekarang ada pilihan bidang magang
-2. **Kepala Bidang** - Ada approval dari kepala bidang
-3. **Pembimbing** - Setiap peserta dapat pembimbing khusus
-4. **Durasi Fleksibel** - Bisa 1-6 bulan sesuai kebutuhan
-5. **Jurnal Enhanced** - Ada skill, kendala, solusi (refleksi)
-6. **GPS Tracking** - Absensi pakai GPS lokasi
-7. **Approval Berlapis** - Admin → Kepala Bidang → Pembimbing
-8. **Notifikasi Real-time** - Auto notif setiap ada update
-9. **Sertifikat Digital** - QR code untuk verifikasi
+1. **User Management** - 4 level user vs 2 level sebelumnya
+2. **Pengajuan** - Approval berlapis (admin → kepala bidang)
+3. **Jurnal** - Tambah review dari pembimbing
+4. **Tugas** - Sistem feedback dan grading
+5. **Nilai** - Multi-kategori assessment  
+6. **Sertifikat** - Verifikasi dengan QR code
+7. **File Management** - Unified system
+8. **Master Data** - Bidang, kepala bidang, pembimbing
+
+### **🎯 BUSINESS RULES YANG DIPERTAHANKAN**
+
+#### **Dari SIPPOL:**
+- Status user: 0=disabled, 1=enabled
+- Status presensi: '5'=check in, lainnya=check out
+- Password hashing dengan PHP password_hash()
+- Backup data di tabel presensi
+
+#### **Dari SIMPOL:**
+- Level user: 1=admin, 2=user (diperluas jadi 1,2,3,4)
+- Status jurnal: 0=draft, 1=submitted, 2=approved, 3=rejected
+- Auto timestamp pada record creation
+- File upload dengan validation
 
 ---
 
-## **JADWAL IMPLEMENTASI**
+## **ESTIMASI IMPLEMENTASI**
 
 ### **📅 TIMELINE 5 MINGGU**
 
-**Minggu 1: Setup**
-- Buat database baru
-- Buat semua tabel  
-- Setup relasi
+**Minggu 1:**
+- Setup database SIMPPOL
+- Buat semua tabel dengan structure lengkap
+- Buat foreign key constraints
 
-**Minggu 2: Master Data**
-- Pindahin data institusi dari SIPPOL
-- Input master bidang, kepala bidang, pembimbing
-- Setup admin user
+**Minggu 2:**
+- Migrasi data instansi dari SIPPOL
+- Migrasi data user dari SIPPOL & SIMPOL
+- Setup master bidang, kepala bidang, pembimbing
 
-**Minggu 3: Data User & Absensi** 
-- Pindahin user dari SIPPOL & SIMPOL
-- Pindahin data absensi SIPPOL
-- Fix duplikasi data
+**Minggu 3:**
+- Migrasi data presensi dari SIPPOL
+- Migrasi data pengajuan dari SIPPOL
+- Handle konflik dan duplikasi data
 
-**Minggu 4: Data PKL**
-- Pindahin jurnal dari SIMPOL
-- Pindahin tugas dari SIMPOL  
-- Pindahin nilai dari SIMPOL
+**Minggu 4:**
+- Migrasi jurnal, tugas, nilai dari SIMPOL
+- Migrasi sertifikat dan files dari SIMPOL
+- Testing integritas data
 
-**Minggu 5: Testing**
-- Test semua fitur
-- Fix bug
-- User training
+**Minggu 5:**
+- Full system testing
+- Performance tuning
+- User acceptance testing
 
+### **📊 ESTIMASI DATA**
 
-
-## **KEUNGGULAN DATABASE INI**
-
-### **✅ YANG BAGUS**
-1. **Simple tapi Lengkap** - Mudah dipahami, fitur komplit
-2. **Gabungan Terbaik** - Ambil yang bagus dari SIPPOL & SIMPOL  
-3. **Fitur Magang Modern** - GPS, approval berlapis, refleksi
-4. **Data Aman** - Backup data, audit trail, soft delete
-5. **Bisa Berkembang** - Mudah tambah fitur baru
-
-### **🎯 HASIL SETELAH JADI**
-- Proses magang lebih terorganisir 80%
-- Admin work berkurang 60% 
-- Peserta lebih puas 90%
-- Data lebih akurat dan real-time
-
-**Database ini siap mendukung sistem magang Kominfo yang modern dan mudah digunakan!**
+| Tabel | Estimasi Records |
+|-------|------------------|
+| instansi | ~30 |
+| users | ~400 |
+| pengajuan | ~200 |
+| presensi | ~8.000 |
+| jurnal | ~3.000 |
+| tugas | ~75 |
+| submission_tugas | ~300 |
+| nilai | ~750 |
+| sertifikat | ~200 |
 
 ---
 
+## **KEUNGGULAN DATABASE INI**
 
+### **✅ KELEBIHAN DESIGN**
+
+1. **Unified Structure** - Menggabungkan kekuatan SIPPOL dan SIMPOL
+2. **Enhanced Features** - Fitur magang yang lebih lengkap
+3. **Data Integrity** - Foreign keys dan constraints yang proper
+4. **Scalable** - Mudah dikembangkan untuk fitur masa depan
+5. **Backward Compatible** - Data lama tetap bisa digunakan
+
+### **🎯 HASIL YANG DIHARAPKAN**
+
+- **Sistem terintegrasi** - Satu database untuk semua kebutuhan magang
+- **Approval workflow** - Proses persetujuan yang terstruktur  
+- **Better monitoring** - Tracking aktivitas peserta yang lebih baik
+- **Digital certificate** - Sertifikat dengan verifikasi QR code
+- **Reduced redundancy** - Eliminasi duplikasi data dan proses
+
+**Database SIMPPOL siap mendukung sistem magang modern Kominfo Kediri!**
+
+---
+
+*Database Design berdasarkan analisis SIPPOL & SIMPOL*  
+*Generated: 26 Agustus 2025*

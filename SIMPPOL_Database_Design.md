@@ -554,19 +554,6 @@ Sesuai struktur organisasi Kominfo Kediri saat ini
 - Performance tuning
 - User acceptance testing
 
-### **📊 ESTIMASI DATA**
-
-| Tabel | Estimasi Records |
-|-------|------------------|
-| instansi | ~30 |
-| users | ~400 |
-| pengajuan | ~200 |
-| presensi | ~8.000 |
-| jurnal | ~3.000 |
-| tugas | ~75 |
-| submission_tugas | ~300 |
-| nilai | ~750 |
-| sertifikat | ~200 |
 
 ---
 
